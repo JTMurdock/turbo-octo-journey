@@ -155,7 +155,7 @@ Build the core client-side logic: the `usePlanner` hook that owns all session st
 - The API base URL should be read from `import.meta.env.VITE_API_URL` (defaulting to `http://localhost:8000`)
 - Saved snapshots are in-memory during a session and survive refresh via localStorage
 
-**Status:** [ ] pending
+**Status:** [x] done
 
 ---
 

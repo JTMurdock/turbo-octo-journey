@@ -191,7 +191,7 @@ Build all React components that compose the planning panel. Components are prese
 - Per-card reroll button is always clickable (not gated by lock state) — lock only gates "Reroll All"
 - `SavedList` should appear below or beside the main panel — a collapsed/expandable section works well
 
-**Status:** [ ] pending
+**Status:** [x] done
 
 ---
 

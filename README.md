@@ -9,7 +9,7 @@ A creative-planning web app that helps artists, writers, and musicians get unstu
 | Tool | Version |
 |---|---|
 | Node.js | 18 + |
-| Python | 3.10 + |
+| Python | 3.9 + |
 | pip | latest |
 
 You also need an **IBM watsonx.ai** account with:

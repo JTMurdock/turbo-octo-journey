@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { FACET_KEYS } from "../constants/facetKeys";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
@@ -16,33 +16,51 @@ export function usePlanner() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Refs so callbacks always see the latest values without stale closures
+  const keywordsRef = useRef(keywords);
+  const mediumRef = useRef(medium);
+  const facetsRef = useRef(facets);
+  const lockStatesRef = useRef(lockStates);
+  keywordsRef.current = keywords;
+  mediumRef.current = medium;
+  facetsRef.current = facets;
+  lockStatesRef.current = lockStates;
+
   const toggleLock = useCallback((facetKey) => {
     setLockStates((prev) => ({ ...prev, [facetKey]: !prev[facetKey] }));
   }, []);
 
-  /** Build the locked_facets payload: only include facets that are currently locked. */
-  function buildLockedFacets(overrideLockStates) {
-    const locks = overrideLockStates ?? lockStates;
+  /** Build the locked_facets payload using the latest facets + a given lock map. */
+  function buildLockedFacets(lockMap) {
+    const currentFacets = facetsRef.current;
     return Object.fromEntries(
-      FACET_KEYS.filter((k) => locks[k]).map((k) => [k, facets[k]])
+      FACET_KEYS.filter((k) => lockMap[k]).map((k) => [k, currentFacets[k]])
     );
   }
 
-  async function callApi(lockedFacets, isRandom = false) {
-    const resp = await fetch(`${API_BASE}/planner/generate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        keywords,
-        medium,
-        locked_facets: lockedFacets,
-        random: isRandom,
-      }),
-    });
+  async function callApi(lockedFacets) {
+    let resp;
+    try {
+      resp = await fetch(`${API_BASE}/planner/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          keywords: keywordsRef.current,
+          medium: mediumRef.current,
+          locked_facets: lockedFacets,
+        }),
+      });
+    } catch {
+      throw new Error("Something went wrong, please retry");
+    }
     if (!resp.ok) {
       throw new Error("Something went wrong, please retry");
     }
-    return resp.json();
+    try {
+      return await resp.json();
+    } catch {
+      throw new Error("Something went wrong, please retry");
+    }
   }
 
   /** First-time generation — all facets unlocked. */
@@ -59,15 +77,14 @@ export function usePlanner() {
     } finally {
       setIsLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [keywords, medium]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /** Reroll all unlocked facets; locked ones stay fixed. */
   const rerollAll = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await callApi(buildLockedFacets());
+      const data = await callApi(buildLockedFacets(lockStatesRef.current));
       setFacets((prev) => ({ ...prev, ...data.facets }));
       setTheme(data.theme);
     } catch (err) {
@@ -75,31 +92,27 @@ export function usePlanner() {
     } finally {
       setIsLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [keywords, medium, lockStates, facets]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * Reroll exactly one facet regardless of its lock state.
    * All other facets are treated as locked for this call.
-   * The lock map is restored exactly afterward.
+   * The real lockStates is never modified.
    */
   const reroll = useCallback(async (facetKey) => {
     setIsLoading(true);
     setError(null);
-    // Temporarily lock everything except the target key
     const tempLocks = Object.fromEntries(FACET_KEYS.map((k) => [k, k !== facetKey]));
     try {
       const data = await callApi(buildLockedFacets(tempLocks));
       setFacets((prev) => ({ ...prev, ...data.facets }));
-      // theme stays as-is for single-facet rerolls
+      // theme intentionally unchanged for single-facet rerolls
     } catch (err) {
       setError(err.message);
     } finally {
       setIsLoading(false);
-      // lockStates is NOT modified — restored implicitly since we never changed it
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [keywords, medium, facets, lockStates]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /** Restore a saved snapshot into the active session. */
   const restoreSnapshot = useCallback((snapshot) => {

@@ -219,7 +219,7 @@ Connect frontend and backend in a running local environment, verify the full use
 - Common watsonx pitfall: the regional URL must match the resource group region (e.g. `us-south` vs `eu-de`)
 - The `ibm-watsonx-ai` SDK may require the `WATSONX_URL` to end without a trailing slash
 
-**Status:** [ ] pending
+**Status:** [x] done
 
 ---
 

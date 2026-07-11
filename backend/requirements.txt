@@ -1,5 +1,5 @@
 fastapi
 uvicorn[standard]
-ibm-watsonx-ai
+httpx
 python-dotenv
 pydantic

@@ -124,8 +124,9 @@ Build the complete backend data contract and AI integration. The endpoint receiv
 - Reference constellation should produce a mix of named works/artists and abstract aesthetic descriptors
 - The model must be instructed to return strict JSON — use a system prompt that says "respond only with a JSON object, no prose"
 - `ibm-watsonx-ai` SDK: `ModelInference(model_id=..., credentials=Credentials(api_key=..., url=...), project_id=...)`
+- **Note:** `ibm-watsonx-ai` requires Python ≥3.10; this project uses the watsonx REST API directly via `httpx` instead.
 
-**Status:** [ ] pending
+**Status:** [x] done
 
 ---
 

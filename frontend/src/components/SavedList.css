@@ -1,0 +1,85 @@
+.saved-list {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.saved-list__toggle {
+  background: var(--color-surface);
+  border: none;
+  color: var(--color-text-muted);
+  display: flex;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  transition: background var(--transition), color var(--transition);
+  width: 100%;
+}
+
+.saved-list__toggle:hover {
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+}
+
+.saved-list__chevron {
+  font-size: var(--font-size-xs);
+}
+
+.saved-list__items {
+  border-top: 1px solid var(--color-border-muted);
+  list-style: none;
+}
+
+.saved-list__item {
+  align-items: stretch;
+  border-bottom: 1px solid var(--color-border-muted);
+  display: flex;
+}
+
+.saved-list__item:last-child {
+  border-bottom: none;
+}
+
+.saved-list__restore-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-text);
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  transition: background var(--transition);
+}
+
+.saved-list__restore-btn:hover {
+  background: var(--color-surface-alt);
+}
+
+.saved-list__item-theme {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.saved-list__item-meta {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  text-transform: capitalize;
+}
+
+.saved-list__delete-btn {
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--color-border-muted);
+  color: var(--color-text-dim);
+  font-size: var(--font-size-sm);
+  padding: var(--space-3) var(--space-4);
+  transition: background var(--transition), color var(--transition);
+}
+
+.saved-list__delete-btn:hover {
+  background: color-mix(in srgb, var(--color-surface) 70%, var(--color-danger) 30%);
+  color: var(--color-danger);
+}

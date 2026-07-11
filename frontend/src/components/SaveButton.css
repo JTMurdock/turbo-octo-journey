@@ -1,0 +1,8 @@
+.save-btn {
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+
+.save-btn--flash {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}

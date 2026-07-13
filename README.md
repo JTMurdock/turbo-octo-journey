@@ -14,7 +14,7 @@ A creative-planning web app that helps artists, writers, and musicians get unstu
 
 You also need an **IBM watsonx.ai** account with:
 - An API key (IBM Cloud → Manage → Access → API Keys)
-- A project with `ibm/granite-3-3-8b-instruct` deployed
+- A project with `ibm/granite-4-h-small` deployed (or any available Granite model)
 - Your project's region and project ID
 
 ---
@@ -57,7 +57,7 @@ cp .env.example .env
 | `WATSONX_API_KEY` | ✅ | IBM Cloud API key with watsonx.ai access |
 | `WATSONX_PROJECT_ID` | ✅ | watsonx.ai project ID (project settings → Manage tab) |
 | `WATSONX_URL` | ✅ | Regional endpoint, e.g. `https://us-south.ml.cloud.ibm.com` |
-| `WATSONX_MODEL_ID` | ➖ | Defaults to `ibm/granite-3-3-8b-instruct` |
+| `WATSONX_MODEL_ID` | ➖ | Defaults to `ibm/granite-4-h-small` |
 
 > **Tip:** The `WATSONX_URL` region must match the region your IBM Cloud resource group lives in. No trailing slash.
 

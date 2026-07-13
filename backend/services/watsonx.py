@@ -13,24 +13,13 @@ load_dotenv()
 _API_KEY = os.getenv("WATSONX_API_KEY", "")
 _PROJECT_ID = os.getenv("WATSONX_PROJECT_ID", "")
 _URL = os.getenv("WATSONX_URL", "https://us-south.ml.cloud.ibm.com").rstrip("/")
-_MODEL_ID = os.getenv("WATSONX_MODEL_ID", "ibm/granite-3-3-8b-instruct")
+_MODEL_ID = os.getenv("WATSONX_MODEL_ID", "ibm/granite-4-h-small")
 
 # Sensory palette label changes per medium
 _PALETTE_LABEL: Dict[Medium, str] = {
     Medium.visual: "palette",
     Medium.writing: "diction",
     Medium.music: "timbre",
-}
-
-# Human-readable facet labels for prompting
-_FACET_LABELS: Dict[FacetKey, str] = {
-    FacetKey.emotional_core: "emotional_core",
-    FacetKey.sensory_palette: "sensory_palette",
-    FacetKey.structural_anchor: "structural_anchor",
-    FacetKey.tension_pair: "tension_pair",
-    FacetKey.reference_constellation: "reference_constellation",
-    FacetKey.constraint: "constraint",
-    FacetKey.avoid_list: "avoid_list",
 }
 
 ALL_FACET_KEYS: List[FacetKey] = list(FacetKey)
@@ -51,10 +40,9 @@ def _get_iam_token() -> str:
     return resp.json()["access_token"]
 
 
-def _build_prompt(keywords: str, medium: Medium, unlocked_keys: List[FacetKey]) -> str:
+def _build_messages(keywords: str, medium: Medium, unlocked_keys: List[FacetKey]) -> list:
     palette_label = _PALETTE_LABEL[medium]
 
-    # Describe each unlocked facet in medium-aware language
     facet_descriptions: Dict[FacetKey, str] = {
         FacetKey.emotional_core: "the dominant emotion or psychological state",
         FacetKey.sensory_palette: f"the {palette_label} — sensory qualities, textures, and tones appropriate for {medium.value} work",
@@ -71,13 +59,13 @@ def _build_prompt(keywords: str, medium: Medium, unlocked_keys: List[FacetKey]) 
         for k in unlocked_keys
     )
 
-    system = (
+    system_content = (
         "You are a creative planning assistant. "
         "Respond ONLY with a single valid JSON object — no prose, no markdown, no code fences. "
         "All string values must be concise (one sentence or a short comma-separated list)."
     )
 
-    user = (
+    user_content = (
         f"Medium: {medium.value}\n"
         f"Keywords / theme: {keywords}\n\n"
         f"Generate values for exactly these facet keys: {keys_list}\n\n"
@@ -86,39 +74,37 @@ def _build_prompt(keywords: str, medium: Medium, unlocked_keys: List[FacetKey]) 
         f'Also include a "theme" key: a short evocative title (3–6 words) for this creative direction.'
     )
 
-    return system, user
+    return [
+        {"role": "system", "content": system_content},
+        {"role": "user", "content": user_content},
+    ]
 
 
 def generate_facets(request: GenerateRequest) -> dict:
-    """Call the watsonx text generation API and return merged facets + theme."""
+    """Call the watsonx chat API and return merged facets + theme."""
     locked = {FacetKey(k): v for k, v in request.locked_facets.items()}
     unlocked_keys = [k for k in ALL_FACET_KEYS if k not in locked]
 
     if not unlocked_keys:
-        # All facets locked — nothing to regenerate
         return {
             "facets": {k.value: v for k, v in locked.items()},
             "theme": "",
         }
 
-    system_prompt, user_prompt = _build_prompt(request.keywords, request.medium, unlocked_keys)
-    combined_prompt = f"<|system|>\n{system_prompt}\n<|user|>\n{user_prompt}\n<|assistant|>\n"
-
+    messages = _build_messages(request.keywords, request.medium, unlocked_keys)
     token = _get_iam_token()
 
     payload = {
         "model_id": _MODEL_ID,
-        "input": combined_prompt,
+        "messages": messages,
         "parameters": {
-            "decoding_method": "greedy",
             "max_new_tokens": 600,
-            "stop_sequences": [],
         },
         "project_id": _PROJECT_ID,
     }
 
     resp = httpx.post(
-        f"{_URL}/ml/v1/text/generation?version=2023-05-29",
+        f"{_URL}/ml/v1/text/chat?version=2023-05-29",
         json=payload,
         headers={
             "Authorization": f"Bearer {token}",
@@ -129,7 +115,7 @@ def generate_facets(request: GenerateRequest) -> dict:
     )
     resp.raise_for_status()
 
-    raw_text: str = resp.json()["results"][0]["generated_text"].strip()
+    raw_text: str = resp.json()["choices"][0]["message"]["content"].strip()
 
     # Strip any accidental markdown fences
     raw_text = re.sub(r"^```[a-z]*\n?", "", raw_text)
@@ -138,7 +124,6 @@ def generate_facets(request: GenerateRequest) -> dict:
     try:
         generated = json.loads(raw_text)
     except json.JSONDecodeError:
-        # Attempt to extract the first JSON object from the response
         match = re.search(r"\{.*\}", raw_text, re.DOTALL)
         if not match:
             raise ValueError(f"Model did not return valid JSON. Raw: {raw_text[:300]}")
@@ -146,7 +131,6 @@ def generate_facets(request: GenerateRequest) -> dict:
 
     theme: str = generated.pop("theme", "")
 
-    # Merge: generated values for unlocked keys + existing values for locked keys
     facets: Dict[str, str] = {}
     for key in ALL_FACET_KEYS:
         if key in locked:

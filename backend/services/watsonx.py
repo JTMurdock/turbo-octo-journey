@@ -131,6 +131,11 @@ def generate_facets(request: GenerateRequest) -> dict:
 
     theme: str = generated.pop("theme", "")
 
+    # Normalise any list values the model returns to comma-joined strings
+    for k, v in generated.items():
+        if isinstance(v, list):
+            generated[k] = ", ".join(str(item) for item in v)
+
     facets: Dict[str, str] = {}
     for key in ALL_FACET_KEYS:
         if key in locked:

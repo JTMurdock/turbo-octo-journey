@@ -1,0 +1,71 @@
+.action-bar {
+  align-items: center;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  gap: var(--space-4);
+  justify-content: space-between;
+  margin-top: auto;
+  padding: var(--space-3) var(--space-6);
+}
+
+/* Tip section */
+.action-bar__tip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.action-bar__tip-title {
+  align-items: center;
+  color: var(--color-text);
+  display: flex;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  gap: var(--space-1);
+}
+
+.action-bar__tip-sub {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+/* Center tagline */
+.action-bar__tagline {
+  align-items: center;
+  color: var(--color-text-muted);
+  display: flex;
+  font-size: var(--font-size-xs);
+  font-style: italic;
+  gap: var(--space-2);
+  text-align: center;
+  flex: 1;
+  justify-content: center;
+}
+
+/* Star icon in tip and tagline */
+.action-bar__star-icon {
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+/* Buttons group */
+.action-bar__buttons {
+  display: flex;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.action-bar__btn {
+  align-items: center;
+  display: flex;
+  font-size: var(--font-size-sm);
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  white-space: nowrap;
+}
+
+.action-bar__btn--save {
+  padding: var(--space-2) var(--space-4);
+}

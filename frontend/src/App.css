@@ -48,47 +48,38 @@
 
 /* --- App shell --- */
 .app {
-  margin: 0 auto;
-  max-width: 900px;
-  padding: var(--space-6) var(--space-5);
-}
-
-.app__header {
-  margin-bottom: var(--space-6);
-}
-
-.app__title {
-  font-size: var(--font-size-xl);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-}
-
-.app__subtitle {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-  margin-top: var(--space-2);
-}
-
-.app__main {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
+  height: 100vh;
+  overflow: hidden;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-family);
 }
 
-/* --- Controls section --- */
-.app__controls {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+.app__content {
+  flex: 1;
+  overflow-y: auto;
+  min-width: 0;
 }
 
+/* --- Controls row (used in PromptSetView) --- */
 .app__controls-row {
   align-items: center;
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
   justify-content: space-between;
+}
+
+/* --- Tab views --- */
+.tab-view {
+  padding: var(--space-6);
+  height: 100%;
+}
+
+.tab-view__empty {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-base);
 }
 
 .app__error {

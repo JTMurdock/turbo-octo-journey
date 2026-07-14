@@ -1,4 +1,4 @@
-// Canonical ordered list of the seven facet keys — matches backend FacetKey enum.
+// Canonical ordered list of the eight facet keys — matches backend FacetKey enum.
 export const FACET_KEYS = [
   "emotional_core",
   "sensory_palette",
@@ -7,6 +7,7 @@ export const FACET_KEYS = [
   "reference_constellation",
   "constraint",
   "avoid_list",
+  "subject_matter",
 ];
 
 // Human-readable labels per facet, with medium-aware override for sensory_palette.
@@ -18,6 +19,7 @@ export const FACET_LABELS = {
   reference_constellation: "Reference Constellation",
   constraint: "Constraint",
   avoid_list: "Avoid List",
+  subject_matter: "Subject Matter",
 };
 
 // Medium-specific label for the sensory_palette facet.

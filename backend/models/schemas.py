@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from pydantic import BaseModel, field_validator
 
@@ -18,6 +18,7 @@ class FacetKey(str, Enum):
     reference_constellation = "reference_constellation"
     constraint = "constraint"
     avoid_list = "avoid_list"
+    subject_matter = "subject_matter"
 
 
 class GenerateRequest(BaseModel):
@@ -34,6 +35,13 @@ class GenerateRequest(BaseModel):
         return v
 
 
+class PaletteColor(BaseModel):
+    hex: str
+    name: str
+
+
 class GenerateResponse(BaseModel):
     facets: Dict[FacetKey, str]
     theme: str
+    quote: str = ""
+    palette_colors: Optional[List[PaletteColor]] = None

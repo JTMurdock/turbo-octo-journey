@@ -11,6 +11,8 @@ export function usePlanner() {
   const [medium, setMedium] = useState("visual");
   const [facets, setFacets] = useState(EMPTY_FACETS);
   const [theme, setTheme] = useState("");
+  const [quote, setQuote] = useState("");
+  const [paletteColors, setPaletteColors] = useState(null);
   // lockStates: { [facetKey]: boolean }  true = locked
   const [lockStates, setLockStates] = useState(ALL_UNLOCKED);
   const [isLoading, setIsLoading] = useState(false);
@@ -63,7 +65,7 @@ export function usePlanner() {
     }
   }
 
-  /** First-time generation — all facets unlocked. */
+  /** First-time generation — all facets unlocked. Returns true on success. */
   const generate = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -71,9 +73,13 @@ export function usePlanner() {
       const data = await callApi({});
       setFacets(data.facets);
       setTheme(data.theme);
+      setQuote(data.quote ?? "");
+      setPaletteColors(data.palette_colors ?? null);
       setLockStates(ALL_UNLOCKED);
+      return true;
     } catch (err) {
       setError(err.message);
+      return false;
     } finally {
       setIsLoading(false);
     }
@@ -87,6 +93,8 @@ export function usePlanner() {
       const data = await callApi(buildLockedFacets(lockStatesRef.current));
       setFacets((prev) => ({ ...prev, ...data.facets }));
       setTheme(data.theme);
+      setQuote(data.quote ?? "");
+      setPaletteColors(data.palette_colors ?? null);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -107,6 +115,10 @@ export function usePlanner() {
       const data = await callApi(buildLockedFacets(tempLocks));
       setFacets((prev) => ({ ...prev, ...data.facets }));
       // theme intentionally unchanged for single-facet rerolls
+      // only update palette colors when the sensory_palette facet is being rerolled
+      if (facetKey === "sensory_palette") {
+        setPaletteColors(data.palette_colors ?? null);
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -118,7 +130,9 @@ export function usePlanner() {
   const restoreSnapshot = useCallback((snapshot) => {
     setFacets(snapshot.facets);
     setTheme(snapshot.theme);
+    setQuote(snapshot.quote ?? "");
     setMedium(snapshot.medium);
+    setPaletteColors(snapshot.paletteColors ?? null);
     setLockStates(ALL_UNLOCKED);
     setError(null);
   }, []);
@@ -130,6 +144,8 @@ export function usePlanner() {
     setMedium,
     facets,
     theme,
+    quote,
+    paletteColors,
     lockStates,
     toggleLock,
     generate,

@@ -51,6 +51,7 @@ def _build_messages(keywords: str, medium: Medium, unlocked_keys: List[FacetKey]
         FacetKey.reference_constellation: "3–5 named works, artists, or aesthetic descriptors that define the aesthetic territory",
         FacetKey.constraint: "one productive creative constraint to apply",
         FacetKey.avoid_list: "2–3 things to consciously avoid",
+        FacetKey.subject_matter: "a concrete scene, scenario, or subject — specific enough to spark an immediate mental image (e.g. 'two strangers share an umbrella on a rain-soaked platform')",
     }
 
     keys_list = [k.value for k in unlocked_keys]
@@ -65,13 +66,23 @@ def _build_messages(keywords: str, medium: Medium, unlocked_keys: List[FacetKey]
         "All string values must be concise (one sentence or a short comma-separated list)."
     )
 
+    palette_colors_instruction = ""
+    if medium == Medium.visual:
+        palette_colors_instruction = (
+            '\nAlso include a "palette_colors" key: an array of exactly 4 objects, '
+            'each with "hex" (a valid CSS hex color, e.g. "#1B1D20") and "name" '
+            '(a short evocative color name) keys.'
+        )
+
     user_content = (
         f"Medium: {medium.value}\n"
         f"Keywords / theme: {keywords}\n\n"
         f"Generate values for exactly these facet keys: {keys_list}\n\n"
         f"Return a JSON object with this exact shape:\n"
         f"{{\n{facet_lines}\n}}\n\n"
-        f'Also include a "theme" key: a short evocative title (3–6 words) for this creative direction.'
+        f'Also include a "theme" key: a short evocative title (3–6 words) for this creative direction.\n'
+        f'Also include a "quote" key: 1–2 short evocative sentences that capture the emotional essence of this creative direction (e.g. "Beauty in the fracture. Silence between the shards.").'
+        f"{palette_colors_instruction}"
     )
 
     return [
@@ -98,7 +109,7 @@ def generate_facets(request: GenerateRequest) -> dict:
         "model_id": _MODEL_ID,
         "messages": messages,
         "parameters": {
-            "max_new_tokens": 600,
+            "max_new_tokens": 900,
         },
         "project_id": _PROJECT_ID,
     }
@@ -130,6 +141,21 @@ def generate_facets(request: GenerateRequest) -> dict:
         generated = json.loads(match.group())
 
     theme: str = generated.pop("theme", "")
+    quote: str = generated.pop("quote", "")
+
+    # Extract palette_colors for visual medium before normalising lists
+    palette_colors = None
+    if request.medium == Medium.visual:
+        raw_palette = generated.pop("palette_colors", None)
+        if (
+            isinstance(raw_palette, list)
+            and len(raw_palette) == 4
+            and all(
+                isinstance(c, dict) and "hex" in c and "name" in c
+                for c in raw_palette
+            )
+        ):
+            palette_colors = [{"hex": c["hex"], "name": c["name"]} for c in raw_palette]
 
     # Normalise any list values the model returns to comma-joined strings
     for k, v in generated.items():
@@ -143,4 +169,4 @@ def generate_facets(request: GenerateRequest) -> dict:
         else:
             facets[key.value] = generated.get(key.value, "")
 
-    return {"facets": facets, "theme": theme}
+    return {"facets": facets, "theme": theme, "quote": quote, "palette_colors": palette_colors}

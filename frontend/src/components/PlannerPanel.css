@@ -1,38 +1,50 @@
 .planner-panel {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+  padding: var(--space-5) var(--space-6);
+  padding-bottom: var(--space-6);
 }
 
-.planner-panel__theme {
-  border-left: 3px solid var(--color-accent);
-  padding-left: var(--space-4);
-}
+/*
+  Grid layout:
+  [mood-preview] [emotional-core  ] [palette         ]
+  [mood-preview] [structural-anchor][tension-pair    ]
+  [mood-preview] [reference-const ] [constraint      ]
+  [mood-preview] [avoid-list ─────────────────────── ]
+  [mood-preview] [subject-matter ─────────────────── ]
 
-.planner-panel__theme-label {
-  color: var(--color-text-muted);
-  display: block;
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  margin-bottom: var(--space-1);
-  text-transform: uppercase;
-}
-
-.planner-panel__theme-text {
-  color: var(--color-text);
-  font-size: var(--font-size-lg);
-  font-weight: 600;
-  line-height: 1.3;
-}
-
-.planner-panel__toolbar {
-  display: flex;
-  justify-content: flex-end;
-}
-
+  Column 1 = 280px fixed, columns 2–3 = equal 1fr each.
+*/
 .planner-panel__grid {
   display: grid;
+  grid-template-columns: 280px 1fr 1fr;
+  grid-template-rows: repeat(3, auto) auto auto;
+  grid-template-areas:
+    "mood emotional-core  palette"
+    "mood structural-anchor tension-pair"
+    "mood reference-const  constraint"
+    "mood avoid-list        avoid-list"
+    "mood subject-matter    subject-matter";
   gap: var(--space-3);
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  align-items: start;
+}
+
+/* Mood preview column — spans all 5 rows */
+.planner-panel__mood {
+  grid-area: mood;
+  align-self: stretch;
+}
+
+/* Individual facet slot areas */
+.planner-panel__slot--emotional-core     { grid-area: emotional-core; }
+.planner-panel__slot--palette            { grid-area: palette; }
+.planner-panel__slot--structural-anchor  { grid-area: structural-anchor; }
+.planner-panel__slot--tension-pair       { grid-area: tension-pair; }
+.planner-panel__slot--reference-const    { grid-area: reference-const; }
+.planner-panel__slot--constraint         { grid-area: constraint; }
+.planner-panel__slot--avoid-list         { grid-area: avoid-list; }
+.planner-panel__slot--subject-matter     { grid-area: subject-matter; }
+
+/* Cards that span the full 2-column width fill their slot height */
+.planner-panel__slot--avoid-list .facet-card,
+.planner-panel__slot--subject-matter .facet-card {
+  height: 100%;
 }

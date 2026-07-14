@@ -26,11 +26,21 @@
 }
 
 .facet-card__label {
+  align-items: center;
   color: var(--color-text-muted);
+  display: flex;
   font-size: var(--font-size-xs);
   font-weight: 600;
+  gap: var(--space-2);
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+.facet-card__label-icon {
+  color: var(--color-text-dim);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .facet-card--locked .facet-card__label {
@@ -43,11 +53,13 @@
 }
 
 .facet-card__icon-btn {
+  align-items: center;
   background: transparent;
   border: none;
   border-radius: var(--radius-sm);
   color: var(--color-text-muted);
-  font-size: var(--font-size-md);
+  display: flex;
+  justify-content: center;
   line-height: 1;
   padding: var(--space-1) var(--space-2);
   transition: background var(--transition), color var(--transition);
@@ -63,9 +75,6 @@
   opacity: 0.4;
 }
 
-.facet-card__reroll-btn {
-  font-size: 1.1rem;
-}
 
 .facet-card__content {
   color: var(--color-text);
@@ -77,4 +86,37 @@
 .facet-card__placeholder {
   color: var(--color-text-dim);
   font-style: italic;
+}
+
+.facet-card__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.facet-card__swatch-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.facet-card__swatch-color {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+}
+
+.facet-card__swatch-hex {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-family: monospace;
+}
+
+.facet-card__swatch-name {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-align: center;
 }

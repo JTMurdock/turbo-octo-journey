@@ -1,12 +1,13 @@
 :root {
   /* --- Colour palette --- */
-  --color-bg:          #0f1117;
-  --color-surface:     #181c27;
-  --color-surface-alt: #1f2434;
-  --color-border:      #2e3347;
-  --color-border-muted:#252a3a;
+  --color-bg:          #0d0f14;
+  --color-surface:     #13151e;
+  --color-surface-alt: #1a1d29;
+  --color-sidebar:     #0a0c11;
+  --color-border:      #1e2130;
+  --color-border-muted:#181b27;
 
-  --color-text:        #e8eaf0;
+  --color-text:        #dde1ee;
   --color-text-muted:  #7a839a;
   --color-text-dim:    #4a5068;
 
@@ -25,6 +26,7 @@
   --font-size-md:      1.05rem;
   --font-size-lg:      1.25rem;
   --font-size-xl:      1.6rem;
+  --font-size-2xl:     2.4rem;
   --line-height:       1.6;
 
   /* --- Spacing --- */

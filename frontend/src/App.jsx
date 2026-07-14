@@ -1,19 +1,17 @@
 import { useState } from "react";
 import { usePlanner } from "./hooks/usePlanner";
 import { useSavedGenerations } from "./hooks/useSavedGenerations";
-import { KeywordInput } from "./components/KeywordInput";
-import { RandomThemeButton } from "./components/RandomThemeButton";
-import { MediumSwitcher } from "./components/MediumSwitcher";
-import { PlannerPanel } from "./components/PlannerPanel";
-import { SaveButton } from "./components/SaveButton";
-import { SavedList } from "./components/SavedList";
+import { Sidebar } from "./components/Sidebar";
+import { PromptSetView } from "./components/PromptSetView";
+import { SavedView } from "./components/SavedView";
 import "./App.css";
 
 export default function App() {
   const {
     keywords, setKeywords,
     medium, setMedium,
-    facets, theme,
+    facets, theme, quote,
+    paletteColors,
     lockStates, toggleLock,
     generate, rerollAll, reroll, restoreSnapshot,
     isLoading, error,
@@ -21,10 +19,16 @@ export default function App() {
 
   const { savedList, saveSnapshot, deleteSnapshot } = useSavedGenerations();
 
+  const [activeTab, setActiveTab] = useState("prompt-set");
+  const [screen, setScreen] = useState("home"); // "home" | "results"
+
   // Pending restore snapshot — holds item until user confirms
   const [pendingRestore, setPendingRestore] = useState(null);
 
-  const hasResults = Object.values(facets).some(Boolean);
+  async function handleGenerate() {
+    const ok = await generate();
+    if (ok) setScreen("results");
+  }
 
   function handleRestoreRequest(snapshot) {
     setPendingRestore(snapshot);
@@ -33,63 +37,67 @@ export default function App() {
   function handleRestoreConfirm() {
     restoreSnapshot(pendingRestore);
     setPendingRestore(null);
+    setActiveTab("prompt-set");
+    setScreen("results");
+  }
+
+  function renderContent() {
+    switch (activeTab) {
+      case "prompt-set":
+        return (
+          <PromptSetView
+            keywords={keywords}
+            setKeywords={setKeywords}
+            medium={medium}
+            setMedium={setMedium}
+            facets={facets}
+            theme={theme}
+            quote={quote}
+            paletteColors={paletteColors}
+            lockStates={lockStates}
+            toggleLock={toggleLock}
+            generate={handleGenerate}
+            rerollAll={rerollAll}
+            reroll={reroll}
+            isLoading={isLoading}
+            error={error}
+            onSave={() => saveSnapshot(facets, theme, medium, paletteColors)}
+            screen={screen}
+            onGoHome={() => setScreen("home")}
+          />
+        );
+      case "sketchpad":
+        return (
+          <div className="tab-view">
+            <p className="tab-view__empty">Sketchpad coming soon.</p>
+          </div>
+        );
+      case "saved":
+        return (
+          <SavedView
+            savedList={savedList}
+            onRestore={handleRestoreRequest}
+            onDelete={deleteSnapshot}
+          />
+        );
+      case "settings":
+        return (
+          <div className="tab-view">
+            <p className="tab-view__empty">Settings coming soon.</p>
+          </div>
+        );
+      default:
+        return null;
+    }
   }
 
   return (
     <div className="app">
-      <header className="app__header">
-        <h1 className="app__title">No More Blank Pages</h1>
-        <p className="app__subtitle">Structured creative planning for artists, writers &amp; musicians.</p>
-      </header>
+      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <main className="app__main">
-        {/* Input controls */}
-        <section className="app__controls">
-          <div className="app__controls-row">
-            <MediumSwitcher medium={medium} setMedium={setMedium} isLoading={isLoading} />
-            <RandomThemeButton setKeywords={setKeywords} isLoading={isLoading} />
-          </div>
-          <KeywordInput
-            keywords={keywords}
-            setKeywords={setKeywords}
-            onGenerate={generate}
-            isLoading={isLoading}
-            hasResults={hasResults}
-          />
-          {error && <p className="app__error">{error}</p>}
-        </section>
-
-        {/* Facet grid */}
-        {(hasResults || isLoading) && (
-          <PlannerPanel
-            facets={facets}
-            theme={theme}
-            medium={medium}
-            lockStates={lockStates}
-            onToggleLock={toggleLock}
-            onReroll={reroll}
-            onRerollAll={rerollAll}
-            isLoading={isLoading}
-          />
-        )}
-
-        {/* Save button — only shown when there's content */}
-        {hasResults && (
-          <div className="app__save-row">
-            <SaveButton
-              onSave={() => saveSnapshot(facets, theme, medium)}
-              disabled={isLoading}
-            />
-          </div>
-        )}
-
-        {/* Saved sessions */}
-        <SavedList
-          savedList={savedList}
-          onRestore={handleRestoreRequest}
-          onDelete={deleteSnapshot}
-        />
-      </main>
+      <div className="app__content">
+        {renderContent()}
+      </div>
 
       {/* Restore confirmation dialog */}
       {pendingRestore && (

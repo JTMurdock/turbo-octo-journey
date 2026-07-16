@@ -22,6 +22,12 @@ _PALETTE_LABEL: Dict[Medium, str] = {
     Medium.music: "timbre",
 }
 
+_SENSORY_PALETTE_DESCRIPTION: Dict[Medium, str] = {
+    Medium.visual: "the visual palette — colors, textures, lighting, and surface qualities",
+    Medium.writing: "the diction — word register (e.g. latinate vs. Anglo-Saxon), sentence rhythm, syntactic style, and prose voice (e.g. 'spare declarative sentences, Anglo-Saxon monosyllables' or 'dense subordinate clauses, clinical detachment')",
+    Medium.music: "the timbre — sonic texture, instrumental color, density, and tonal quality (e.g. 'sparse plucked strings, cavernous reverb, submerged bass pulses')",
+}
+
 ALL_FACET_KEYS: List[FacetKey] = list(FacetKey)
 
 
@@ -40,15 +46,22 @@ def _get_iam_token() -> str:
     return resp.json()["access_token"]
 
 
-def _build_messages(keywords: str, medium: Medium, unlocked_keys: List[FacetKey]) -> list:
+_REFERENCE_CONSTELLATION_DESCRIPTION: Dict[Medium, str] = {
+    Medium.visual: "3–5 named visual artists, photographers, art movements, or aesthetic descriptors that define the visual territory",
+    Medium.writing: "3–5 named authors, novels, poetry collections, literary movements, or prose styles that define the literary territory",
+    Medium.music: "3–5 named composers, albums, genres, or sonic touchstones that define the sonic territory",
+}
+
+
+def _build_messages(keywords: str, medium: Medium, unlocked_keys: List[FacetKey], locked_constraint: str = "", locked_context: Dict[FacetKey, str] = {}) -> list:
     palette_label = _PALETTE_LABEL[medium]
 
     facet_descriptions: Dict[FacetKey, str] = {
         FacetKey.emotional_core: "the dominant emotion or psychological state",
-        FacetKey.sensory_palette: f"the {palette_label} — sensory qualities, textures, and tones appropriate for {medium.value} work",
+        FacetKey.sensory_palette: _SENSORY_PALETTE_DESCRIPTION[medium],
         FacetKey.structural_anchor: "the organizing structural principle or form",
         FacetKey.tension_pair: "two opposing forces or contradictions driving the work",
-        FacetKey.reference_constellation: "3–5 named works, artists, or aesthetic descriptors that define the aesthetic territory",
+        FacetKey.reference_constellation: _REFERENCE_CONSTELLATION_DESCRIPTION[medium],
         FacetKey.constraint: "one productive creative constraint to apply",
         FacetKey.avoid_list: "2–3 things to consciously avoid",
         FacetKey.subject_matter: "a concrete scene, scenario, or subject — specific enough to spark an immediate mental image (e.g. 'two strangers share an umbrella on a rain-soaked platform')",
@@ -68,15 +81,36 @@ def _build_messages(keywords: str, medium: Medium, unlocked_keys: List[FacetKey]
 
     palette_colors_instruction = ""
     if medium == Medium.visual:
+        if locked_constraint:
+            constraint_note = (
+                f' The constraint for this work is: "{locked_constraint}". '
+                f'If the constraint restricts color (e.g. black and white, monochrome, limited palette), '
+                f'the hex colors MUST strictly reflect that restriction.'
+            )
+        else:
+            constraint_note = (
+                ' The palette MUST be consistent with the "constraint" value you are generating '
+                'in the same response — if that constraint restricts color (e.g. black and white, '
+                'monochrome, duotone), the hex colors must strictly reflect it.'
+            )
         palette_colors_instruction = (
             '\nAlso include a "palette_colors" key: an array of exactly 4 objects, '
             'each with "hex" (a valid CSS hex color, e.g. "#1B1D20") and "name" '
-            '(a short evocative color name) keys.'
+            f'(a short evocative color name) keys.{constraint_note}'
         )
+
+    locked_context_block = ""
+    if locked_context:
+        context_lines = "\n".join(
+            f"  {k.value}: {v}" for k, v in locked_context.items() if v
+        )
+        if context_lines:
+            locked_context_block = f"\nExisting creative direction (do not regenerate these — use them as context):\n{context_lines}\n"
 
     user_content = (
         f"Medium: {medium.value}\n"
-        f"Keywords / theme: {keywords}\n\n"
+        f"Keywords / theme: {keywords}\n"
+        f"{locked_context_block}\n"
         f"Generate values for exactly these facet keys: {keys_list}\n\n"
         f"Return a JSON object with this exact shape:\n"
         f"{{\n{facet_lines}\n}}\n\n"
@@ -102,7 +136,8 @@ def generate_facets(request: GenerateRequest) -> dict:
             "theme": "",
         }
 
-    messages = _build_messages(request.keywords, request.medium, unlocked_keys)
+    locked_constraint = locked.get(FacetKey.constraint, "")
+    messages = _build_messages(request.keywords, request.medium, unlocked_keys, locked_constraint, locked)
     token = _get_iam_token()
 
     payload = {

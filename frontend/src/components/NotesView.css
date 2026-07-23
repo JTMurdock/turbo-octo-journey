@@ -1,0 +1,65 @@
+.notes-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  height: 100%;
+  padding: var(--space-6);
+}
+
+.notes-view__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.notes-view__title {
+  color: var(--color-text);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin: 0 0 var(--space-1);
+}
+
+.notes-view__theme-hint {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
+
+.notes-view__empty-hint {
+  color: var(--color-text-dim);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+  margin: 0;
+  text-align: right;
+}
+
+.notes-view__textarea {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  flex: 1;
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height);
+  min-height: 400px;
+  padding: var(--space-4);
+  resize: none;
+  transition: border-color var(--transition);
+}
+
+.notes-view__textarea:focus {
+  border-color: var(--color-accent);
+  outline: none;
+}
+
+.notes-view__textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.notes-view__textarea::placeholder {
+  color: var(--color-text-dim);
+  font-style: italic;
+}

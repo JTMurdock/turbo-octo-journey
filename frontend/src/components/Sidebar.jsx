@@ -1,5 +1,6 @@
 import "./Sidebar.css";
 
+
 const TABS = [
   {
     id: "prompt-set",
@@ -14,17 +15,12 @@ const TABS = [
     ),
   },
   {
-    id: "sketchpad",
-    label: "Sketchpad",
+    id: "notepad",
+    label: "Notepad",
     icon: (
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-        <path
-          d="M14.5 3.5l2 2L6 16H4v-2L14.5 3.5z"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinejoin="round"
-        />
-        <path d="M12.5 5.5l2 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        <rect x="4" y="2" width="12" height="16" rx="2" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M7 7h6M7 10h6M7 13h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
       </svg>
     ),
   },
@@ -59,18 +55,18 @@ const TABS = [
   },
 ];
 
-export function Sidebar({ activeTab, onTabChange }) {
+export function Sidebar({ activeTab, onTabChange, onBrandClick }) {
   return (
     <aside className="sidebar">
       {/* Brand logo */}
-      <div className="sidebar__brand" aria-label="No More Blank Pages">
+      <button className="sidebar__brand" aria-label="No More Blank Pages" onClick={onBrandClick}>
         <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
           <path
             d="M11 2l1.8 5.5H18l-4.4 3.2 1.7 5.3L11 13l-4.3 3 1.7-5.3L4 7.5h5.2L11 2z"
             fill="currentColor"
           />
         </svg>
-      </div>
+      </button>
 
       {/* Nav tabs */}
       <nav className="sidebar__nav" aria-label="Main navigation">

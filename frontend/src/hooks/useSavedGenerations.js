@@ -20,9 +20,9 @@ export function useSavedGenerations() {
 
   /**
    * Save a snapshot of the current session.
-   * Schema: { id, timestamp, theme, medium, facets, paletteColors }
+   * Schema: { id, timestamp, theme, medium, facets, paletteColors, notes, quote }
    */
-  const saveSnapshot = useCallback((facets, theme, medium, paletteColors = null) => {
+  const saveSnapshot = useCallback((facets, theme, medium, paletteColors = null, notes = "", quote = "") => {
     const snapshot = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       timestamp: Date.now(),
@@ -30,6 +30,8 @@ export function useSavedGenerations() {
       medium,
       facets,
       paletteColors,
+      notes,
+      quote,
     };
     setSavedList((prev) => {
       const next = [snapshot, ...prev];

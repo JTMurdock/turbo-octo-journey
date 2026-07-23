@@ -4,6 +4,7 @@ import "./PlannerPanel.css";
 
 // Grid area name to facet key mapping — determines visual slot order
 const GRID_SLOTS = [
+  { area: "subject-matter",      key: "subject_matter" },
   { area: "emotional-core",      key: "emotional_core" },
   { area: "palette",             key: "sensory_palette" },
   { area: "structural-anchor",   key: "structural_anchor" },
@@ -11,16 +12,27 @@ const GRID_SLOTS = [
   { area: "reference-const",     key: "reference_constellation" },
   { area: "constraint",          key: "constraint" },
   { area: "avoid-list",          key: "avoid_list" },
-  { area: "subject-matter",      key: "subject_matter" },
 ];
 
-export function PlannerPanel({ facets, theme, quote, medium, paletteColors, lockStates, onToggleLock, onReroll, isLoading }) {
+export function PlannerPanel({ facets, theme, quote, medium, paletteColors, lockStates, onToggleLock, onReroll, isLoading, photoUrl, photoAlt, onPhotoFetched, onRerollPhoto, rerollSeed }) {
   return (
     <section className="planner-panel">
       <div className="planner-panel__grid">
         {/* Column 1: Mood preview — spans all rows */}
         <div className="planner-panel__mood">
-          <MoodPreview theme={theme} quote={quote} isLoading={isLoading} />
+          <MoodPreview
+            theme={theme}
+            quote={quote}
+            subjectMatter={facets.subject_matter}
+            emotionalCore={facets.emotional_core}
+            sensoryPalette={facets.sensory_palette}
+            isLoading={isLoading}
+            photoUrl={photoUrl}
+            photoAlt={photoAlt}
+            onPhotoFetched={onPhotoFetched}
+            onRerollPhoto={onRerollPhoto}
+            rerollSeed={rerollSeed}
+          />
         </div>
 
         {/* Facet cards in their named grid slots */}

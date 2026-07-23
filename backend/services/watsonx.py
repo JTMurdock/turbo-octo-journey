@@ -1,6 +1,8 @@
 import json
+import logging
 import os
 import re
+import time
 from typing import Dict, List
 
 import httpx
@@ -31,8 +33,18 @@ _SENSORY_PALETTE_DESCRIPTION: Dict[Medium, str] = {
 ALL_FACET_KEYS: List[FacetKey] = list(FacetKey)
 
 
+# Module-level cache: (token_string, expiry_unix_timestamp)
+_iam_token_cache: tuple[str, float] = ("", 0.0)
+
+
 def _get_iam_token() -> str:
-    """Exchange an IBM Cloud API key for a short-lived IAM bearer token."""
+    """Return a valid IAM bearer token, refreshing only when expired (~1 hour)."""
+    global _iam_token_cache
+    token, expiry = _iam_token_cache
+    # Reuse the cached token until 60 s before its actual expiry
+    if token and time.time() < expiry - 60:
+        return token
+
     resp = httpx.post(
         "https://iam.cloud.ibm.com/identity/token",
         data={
@@ -43,7 +55,12 @@ def _get_iam_token() -> str:
         timeout=30,
     )
     resp.raise_for_status()
-    return resp.json()["access_token"]
+    data = resp.json()
+    _iam_token_cache = (
+        data["access_token"],
+        float(data.get("expiration", time.time() + 3600)),
+    )
+    return _iam_token_cache[0]
 
 
 _REFERENCE_CONSTELLATION_DESCRIPTION: Dict[Medium, str] = {
@@ -56,13 +73,26 @@ _REFERENCE_CONSTELLATION_DESCRIPTION: Dict[Medium, str] = {
 def _build_messages(keywords: str, medium: Medium, unlocked_keys: List[FacetKey], locked_constraint: str = "", locked_context: Dict[FacetKey, str] = {}) -> list:
     palette_label = _PALETTE_LABEL[medium]
 
+    _constraint_description: Dict[Medium, str] = {
+        Medium.visual: (
+            "one productive creative constraint — NOT a color or palette restriction (the palette facet already covers that). "
+            "Choose from a different category such as: compositional (e.g. 'shoot only from below knee height', 'all subjects cropped at the edge'), "
+            "material or process (e.g. 'analogue double exposure', 'painted over photograph', 'no straight lines'), "
+            "temporal (e.g. 'captured only in the 10 minutes after sunset', 'single unedited frame'), "
+            "conceptual (e.g. 'every element must appear twice', 'foreground and background must tell contradictory stories'), "
+            "or formal (e.g. 'no horizon line', 'negative space occupies at least 70% of the frame', 'symmetry broken by exactly one element')"
+        ),
+        Medium.writing: "one productive creative constraint to apply (e.g. structural, POV, tense, formal, linguistic)",
+        Medium.music: "one productive creative constraint to apply (e.g. instrumentation, tempo, harmonic, structural, dynamic)",
+    }
+
     facet_descriptions: Dict[FacetKey, str] = {
         FacetKey.emotional_core: "the dominant emotion or psychological state",
         FacetKey.sensory_palette: _SENSORY_PALETTE_DESCRIPTION[medium],
         FacetKey.structural_anchor: "the organizing structural principle or form",
         FacetKey.tension_pair: "two opposing forces or contradictions driving the work",
         FacetKey.reference_constellation: _REFERENCE_CONSTELLATION_DESCRIPTION[medium],
-        FacetKey.constraint: "one productive creative constraint to apply",
+        FacetKey.constraint: _constraint_description[medium],
         FacetKey.avoid_list: "2–3 things to consciously avoid",
         FacetKey.subject_matter: "a concrete scene, scenario, or subject — specific enough to spark an immediate mental image (e.g. 'two strangers share an umbrella on a rain-soaked platform')",
     }
@@ -125,6 +155,37 @@ def _build_messages(keywords: str, medium: Medium, unlocked_keys: List[FacetKey]
     ]
 
 
+logger = logging.getLogger(__name__)
+
+_RETRY_STATUSES = {429, 500, 502, 503, 504}
+_MAX_RETRIES = 3
+_RETRY_BACKOFF = [1.0, 2.0, 4.0]  # seconds to wait before each retry
+
+
+def _call_watsonx(payload: dict, token: str) -> httpx.Response:
+    """POST to the WatsonX chat endpoint, retrying on transient errors."""
+    for attempt, wait in enumerate([0.0] + _RETRY_BACKOFF):
+        if wait:
+            logger.warning("WatsonX attempt %d failed, retrying in %.1fs", attempt, wait)
+            time.sleep(wait)
+        resp = httpx.post(
+            f"{_URL}/ml/v1/text/chat?version=2023-05-29",
+            json=payload,
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
+            timeout=60,
+        )
+        if resp.status_code not in _RETRY_STATUSES:
+            break
+        if attempt == _MAX_RETRIES - 1:
+            resp.raise_for_status()
+    resp.raise_for_status()
+    return resp
+
+
 def generate_facets(request: GenerateRequest) -> dict:
     """Call the watsonx chat API and return merged facets + theme."""
     locked = {FacetKey(k): v for k, v in request.locked_facets.items()}
@@ -149,17 +210,7 @@ def generate_facets(request: GenerateRequest) -> dict:
         "project_id": _PROJECT_ID,
     }
 
-    resp = httpx.post(
-        f"{_URL}/ml/v1/text/chat?version=2023-05-29",
-        json=payload,
-        headers={
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        },
-        timeout=60,
-    )
-    resp.raise_for_status()
+    resp = _call_watsonx(payload, token)
 
     raw_text: str = resp.json()["choices"][0]["message"]["content"].strip()
 

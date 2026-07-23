@@ -4,6 +4,7 @@ import { useSavedGenerations } from "./hooks/useSavedGenerations";
 import { Sidebar } from "./components/Sidebar";
 import { PromptSetView } from "./components/PromptSetView";
 import { SavedView } from "./components/SavedView";
+import { NotesView } from "./components/NotesView";
 import "./App.css";
 
 export default function App() {
@@ -11,6 +12,7 @@ export default function App() {
     keywords, setKeywords,
     medium, setMedium,
     facets, theme, quote,
+    notes, setNotes,
     paletteColors,
     lockStates, toggleLock,
     generate, rerollAll, reroll, restoreSnapshot,
@@ -25,7 +27,27 @@ export default function App() {
   // Pending restore snapshot — holds item until user confirms
   const [pendingRestore, setPendingRestore] = useState(null);
 
+  // Inspiration photo state — lifted here so it persists across tab switches
+  const [photoUrl, setPhotoUrl] = useState(null);
+  const [photoAlt, setPhotoAlt] = useState("");
+  const [rerollSeed, setRerollSeed] = useState(0);
+
+  function handlePhotoFetched(url, alt) {
+    setPhotoUrl(url);
+    setPhotoAlt(alt);
+  }
+
+  function handleRerollPhoto() {
+    setPhotoUrl(null);
+    setPhotoAlt("");
+    setRerollSeed((s) => s + 1);
+  }
+
   async function handleGenerate() {
+    // Clear photo so a fresh one is fetched for the new theme
+    setPhotoUrl(null);
+    setPhotoAlt("");
+    setRerollSeed(0);
     const ok = await generate();
     if (ok) setScreen("results");
   }
@@ -37,6 +59,9 @@ export default function App() {
   function handleRestoreConfirm() {
     restoreSnapshot(pendingRestore);
     setPendingRestore(null);
+    setPhotoUrl(null);
+    setPhotoAlt("");
+    setRerollSeed(0);
     setActiveTab("prompt-set");
     setScreen("results");
   }
@@ -61,16 +86,23 @@ export default function App() {
             reroll={reroll}
             isLoading={isLoading}
             error={error}
-            onSave={() => saveSnapshot(facets, theme, medium, paletteColors)}
+            onSave={() => saveSnapshot(facets, theme, medium, paletteColors, notes, quote)}
             screen={screen}
             onGoHome={() => setScreen("home")}
+            photoUrl={photoUrl}
+            photoAlt={photoAlt}
+            onPhotoFetched={handlePhotoFetched}
+            onRerollPhoto={handleRerollPhoto}
+            rerollSeed={rerollSeed}
           />
         );
-      case "sketchpad":
+      case "notepad":
         return (
-          <div className="tab-view">
-            <p className="tab-view__empty">Sketchpad coming soon.</p>
-          </div>
+          <NotesView
+            notes={notes}
+            setNotes={setNotes}
+            theme={theme}
+          />
         );
       case "saved":
         return (
@@ -93,7 +125,11 @@ export default function App() {
 
   return (
     <div className="app">
-      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+      <Sidebar
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onBrandClick={() => { setActiveTab("prompt-set"); setScreen("home"); }}
+      />
 
       <div className="app__content">
         {renderContent()}

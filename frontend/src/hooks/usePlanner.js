@@ -12,6 +12,7 @@ export function usePlanner() {
   const [facets, setFacets] = useState(EMPTY_FACETS);
   const [theme, setTheme] = useState("");
   const [quote, setQuote] = useState("");
+  const [notes, setNotes] = useState("");
   const [paletteColors, setPaletteColors] = useState(null);
   // lockStates: { [facetKey]: boolean }  true = locked
   const [lockStates, setLockStates] = useState(ALL_UNLOCKED);
@@ -74,6 +75,7 @@ export function usePlanner() {
       setFacets(data.facets);
       setTheme(data.theme);
       setQuote(data.quote ?? "");
+      setNotes("");
       setPaletteColors(data.palette_colors ?? null);
       setLockStates(ALL_UNLOCKED);
       return true;
@@ -131,6 +133,7 @@ export function usePlanner() {
     setFacets(snapshot.facets);
     setTheme(snapshot.theme);
     setQuote(snapshot.quote ?? "");
+    setNotes(snapshot.notes ?? "");
     setMedium(snapshot.medium);
     setPaletteColors(snapshot.paletteColors ?? null);
     setLockStates(ALL_UNLOCKED);
@@ -145,6 +148,8 @@ export function usePlanner() {
     facets,
     theme,
     quote,
+    notes,
+    setNotes,
     paletteColors,
     lockStates,
     toggleLock,

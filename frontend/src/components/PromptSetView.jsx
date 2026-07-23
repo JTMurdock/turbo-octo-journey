@@ -4,6 +4,7 @@ import { MediumSwitcher } from "./MediumSwitcher";
 import { PlannerPanel } from "./PlannerPanel";
 import { ActionBar } from "./ActionBar";
 import "./PromptSetView.css";
+import LOGO from "../assets/LOGO_NO_BG.png";
 
 export function PromptSetView({
   keywords,
@@ -24,6 +25,11 @@ export function PromptSetView({
   onSave,
   screen,
   onGoHome,
+  photoUrl,
+  photoAlt,
+  onPhotoFetched,
+  onRerollPhoto,
+  rerollSeed,
 }) {
   return (
     <div className="prompt-set-view">
@@ -31,16 +37,11 @@ export function PromptSetView({
         <div className="prompt-set-view__home">
           <header className="prompt-set-view__home-header">
             <div className="prompt-set-view__home-brand">
-              <svg width="32" height="32" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-                <path
-                  d="M11 2l1.8 5.5H18l-4.4 3.2 1.7 5.3L11 13l-4.3 3 1.7-5.3L4 7.5h5.2L11 2z"
-                  fill="currentColor"
-                />
-              </svg>
+              <img src = {LOGO} alt="No More Blank Pages" width="78" height="78"/>
             </div>
             <h1 className="prompt-set-view__home-title">No More Blank Pages</h1>
             <p className="prompt-set-view__home-tagline">
-              A curated prompt set to spark direction and overcome the blank page.
+              A blank page holds infinite potential. Let's dive in!
             </p>
           </header>
 
@@ -64,9 +65,6 @@ export function PromptSetView({
           {/* Top header bar */}
           <header className="prompt-set-view__results-header">
             <div className="prompt-set-view__results-header-left">
-              <button className="prompt-set-view__back-btn" onClick={onGoHome}>
-                ← New Theme
-              </button>
               <span className="prompt-set-view__eyebrow">THEME</span>
               <h1 className="prompt-set-view__title">{theme}</h1>
             </div>
@@ -94,10 +92,15 @@ export function PromptSetView({
             onReroll={reroll}
             onRerollAll={rerollAll}
             isLoading={isLoading}
+            photoUrl={photoUrl}
+            photoAlt={photoAlt}
+            onPhotoFetched={onPhotoFetched}
+            onRerollPhoto={onRerollPhoto}
+            rerollSeed={rerollSeed}
           />
 
           {/* Bottom action bar */}
-          <ActionBar onSave={onSave} />
+          <ActionBar onSave={onSave} onNewTheme={onGoHome} />
         </div>
       )}
     </div>

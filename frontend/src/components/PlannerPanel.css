@@ -16,24 +16,23 @@
 .planner-panel__grid {
   display: grid;
   grid-template-columns: 280px 1fr 1fr;
-  grid-template-rows: repeat(3, auto) auto auto;
   grid-template-areas:
-    "mood emotional-core  palette"
+    "mood subject-matter    subject-matter"
+    "mood emotional-core    palette"
     "mood structural-anchor tension-pair"
-    "mood reference-const  constraint"
-    "mood avoid-list        avoid-list"
-    "mood subject-matter    subject-matter";
+    "mood reference-const   constraint"
+    "mood avoid-list        avoid-list";
   gap: var(--space-3);
-  align-items: start;
+  align-items: stretch;
 }
 
-/* Mood preview column — spans all 5 rows */
+/* Mood preview column — spans all rows */
 .planner-panel__mood {
   grid-area: mood;
-  align-self: stretch;
 }
 
 /* Individual facet slot areas */
+.planner-panel__slot--subject-matter     { grid-area: subject-matter; }
 .planner-panel__slot--emotional-core     { grid-area: emotional-core; }
 .planner-panel__slot--palette            { grid-area: palette; }
 .planner-panel__slot--structural-anchor  { grid-area: structural-anchor; }
@@ -41,10 +40,8 @@
 .planner-panel__slot--reference-const    { grid-area: reference-const; }
 .planner-panel__slot--constraint         { grid-area: constraint; }
 .planner-panel__slot--avoid-list         { grid-area: avoid-list; }
-.planner-panel__slot--subject-matter     { grid-area: subject-matter; }
 
-/* Cards that span the full 2-column width fill their slot height */
-.planner-panel__slot--avoid-list .facet-card,
-.planner-panel__slot--subject-matter .facet-card {
+/* Every card stretches to fill its row height */
+.planner-panel__slot .facet-card {
   height: 100%;
 }

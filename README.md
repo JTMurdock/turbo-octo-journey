@@ -1,4 +1,4 @@
-# No More Blank Pages
+# Break the Blank
 
 > *A curated prompt set to spark direction and overcome the blank page.*
 
@@ -10,7 +10,7 @@ Every creative project starts in the same place: a blank canvas, a cursor blinki
 
 Existing tools either generate finished content (removing the creator from the process) or offer generic "inspiration" prompts with no structure. Neither approach helps a creator build a coherent creative direction they actually own.
 
-**No More Blank Pages** is a structured creative-planning tool for visual artists, writers, and musicians. It doesn't make the work for you — it maps the territory so you know where to begin.
+**Break the Blank** is a structured creative-planning tool for visual artists, writers, and musicians. It doesn't make the work for you — it maps the territory so you know where to begin.
 
 ---
 

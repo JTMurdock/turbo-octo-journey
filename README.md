@@ -4,6 +4,10 @@
 
 ---
 
+### [Try the Live Demo →](https://breaktheblank.com)
+
+---
+
 ## Problem Statement
 
 Every creative project starts in the same place: a blank canvas, a cursor blinking on an empty document, silence before a note is played. The block isn't a lack of ideas — it's a lack of *direction*. Without a defined emotional register, a structural anchor, or a sense of what to avoid, a creator can spend hours circling the same vague impulse without committing to anything.

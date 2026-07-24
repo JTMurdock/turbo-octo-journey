@@ -37,9 +37,9 @@ export function PromptSetView({
         <div className="prompt-set-view__home">
           <header className="prompt-set-view__home-header">
             <div className="prompt-set-view__home-brand">
-              <img src = {LOGO} alt="No More Blank Pages" width="78" height="78"/>
+              <img src = {LOGO} alt="Break the Blank" width="85" height="85"/>
             </div>
-            <h1 className="prompt-set-view__home-title">No More Blank Pages</h1>
+            <h1 className="prompt-set-view__home-title">Break the Blank</h1>
             <p className="prompt-set-view__home-tagline">
               A blank page holds infinite potential. Let's dive in!
             </p>

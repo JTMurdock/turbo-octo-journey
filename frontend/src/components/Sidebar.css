@@ -71,12 +71,6 @@
   color: var(--color-accent);
 }
 
-/* Settings tab pushed to bottom */
-.sidebar__tab:last-child {
-  margin-top: auto;
-  margin-bottom: var(--space-4);
-}
-
 .sidebar__tab-icon {
   display: flex;
   align-items: center;

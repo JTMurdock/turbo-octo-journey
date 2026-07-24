@@ -21,7 +21,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
   text-align: center;
   max-width: 520px;
 }
@@ -29,7 +29,7 @@
 .prompt-set-view__home-brand {
   color: var(--color-accent);
   opacity: 0.85;
-  margin-bottom: var(--space-2);
+  margin: 0;
 }
 
 .prompt-set-view__home-title {
@@ -38,6 +38,7 @@
   font-weight: 700;
   letter-spacing: -0.03em;
   line-height: 1.15;
+  margin: 0;
 }
 
 .prompt-set-view__home-tagline {
@@ -46,6 +47,7 @@
   font-style: italic;
   line-height: var(--line-height);
   max-width: 380px;
+  margin: 0;
 }
 
 .prompt-set-view__home-controls {
